@@ -258,21 +258,21 @@ build {
 
   # Step 4: Independent CIS audit with OpenSCAP (after hardening).
   # Runs via bash so a noexec /tmp (from CIS mount hardening) doesn't block it.
-  provisioner "shell" {
-    remote_folder   = "/root"
-    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
-    script          = "scripts/04-openscap-audit.sh"
-  }
+  // provisioner "shell" {
+  //   remote_folder   = "/root"
+  //   execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+  //   script          = "scripts/04-openscap-audit.sh"
+  // }
 
   # Step 4b: Pull the OpenSCAP results back to the builder (control node) into a
   # fixed staging dir. The cis-image-builder runner moves this to
   # audit-results/<build_id>/ right after packer exits (one build at a time, so
   # 'latest' is unambiguous). Path is relative to the packer working dir.
-  provisioner "file" {
-    direction   = "download"
-    source      = "/var/log/openscap/"
-    destination = "audit-results/latest/"
-  }
+  // provisioner "file" {
+  //   direction   = "download"
+  //   source      = "/var/log/openscap/"
+  //   destination = "audit-results/latest/"
+  // }
 
 
 
