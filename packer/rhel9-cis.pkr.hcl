@@ -319,7 +319,16 @@ build {
 
       # Ensure SSH is configured to accept key-based auth
       "sed -i 's/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config",
-      "sed -i 's/^#*PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config",
+
+      # FINAL: disable root SSH login (CIS 5.1.20). We deferred this from the
+      # ansible role (rule_5_1_20=false) so Packer could reconnect as root AFTER
+      # the role's reboot. Now, as the very last step before snapshot, lock it
+      # down so the shipped image is compliant. Validation/access uses the baked
+      # 'cisval' non-root sudo user, not root.
+      "sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config",
+      "rm -f /etc/ssh/sshd_config.d/01-permitrootlogin.conf 2>/dev/null || true",
+      "mkdir -p /etc/ssh/sshd_config.d",
+      "printf 'PermitRootLogin no\\n' > /etc/ssh/sshd_config.d/99-cis-permitrootlogin.conf",
 
       # Ensure sshd will start on boot
       "systemctl enable sshd",
