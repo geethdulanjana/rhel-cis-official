@@ -149,8 +149,14 @@ build {
   sources = ["source.tencentcloud-cvm.verify"]
 
   # 1. Reboot so reboot-dependent CIS controls become active, then wait.
+  #    noexec-safe: CIS mounts /tmp noexec, so Packer's default (exec a script
+  #    uploaded to /tmp) fails with exit 126. Stage in /root and run THROUGH
+  #    bash so the file is read as input, not exec'd. (Same pattern as the main
+  #    build template.)
   provisioner "shell" {
     expect_disconnect = true
+    remote_folder     = "/root"
+    execute_command   = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
     inline = [
       "echo 'Rebooting to activate reboot-dependent CIS controls...'",
       "sudo systemctl reboot || sudo reboot || true"
@@ -160,7 +166,9 @@ build {
   # 2. After reboot, confirm the box is back and healthy. Emit HEALTH markers
   #    the cis-image-builder validation runner parses for the health verdict.
   provisioner "shell" {
-    pause_before = "45s"
+    pause_before    = "45s"
+    remote_folder   = "/root"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
     inline = [
       "echo 'Back after reboot:'; uname -r; uptime",
       "echo 'ip_forward now:'; cat /proc/sys/net/ipv4/ip_forward 2>/dev/null || true",
