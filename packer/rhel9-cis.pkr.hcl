@@ -255,6 +255,38 @@ build {
     ]
   }
 
+  # Step 3a-reboot: Reboot to activate reboot-dependent controls (notably the
+  # auditd rules, which are written to /etc/audit/rules.d/ during hardening but
+  # only load into the running kernel after a reboot via augenrules). We do the
+  # reboot HERE in Packer — not via the ansible role — because the role's bare
+  # `ansible.builtin.reboot` is fragile on Tencent (the reconnect hits a fatal
+  # "dial tcp ...:22: i/o timeout" while the NIC comes back). Packer's
+  # expect_disconnect + ssh reconnect is robust. (skip_reboot=true in group_vars
+  # keeps the role from doing its own reboot.)
+  provisioner "shell" {
+    expect_disconnect = true
+    remote_folder     = "/root"
+    execute_command   = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+    inline = [
+      "echo 'Rebooting to activate reboot-dependent CIS controls (audit rules)...'",
+      "sudo systemctl reboot || sudo reboot || true"
+    ]
+  }
+
+  # Step 3a-verify: after reboot, confirm audit rules are loaded (load them if
+  # the kernel ruleset is still empty), so the snapshot has an ACTIVE auditd.
+  provisioner "shell" {
+    pause_before    = "60s"
+    remote_folder   = "/root"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+    inline = [
+      "echo 'Back after reboot:'; uptime",
+      "LIVE=$(sudo auditctl -l 2>/dev/null | wc -l); echo \"audit rules live: $LIVE\"",
+      "if [ \"$LIVE\" -lt 5 ]; then echo 'loading audit rules via augenrules'; sudo augenrules --load || true; fi",
+      "sudo auditctl -l 2>/dev/null | wc -l | xargs echo 'audit rules live now:'"
+    ]
+  }
+
   # Step 3b: Install the TAT agent INTO the hardened image (documented exception
   # to pure CIS). This lets the cis-image-builder validation flow drive a booted
   # CVM via Tencent Automation Tools — the CIS-hardened sshd blocks root SSH, so
