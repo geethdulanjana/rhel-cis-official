@@ -1,0 +1,23 @@
+---
+
+{{ if .Vars.rhel10cis_level_1 }}
+  {{ if .Vars.rhel10cis_rule_2_3_3 }}
+file:
+  chrony_sysconfig:
+    title: 2.3.3 | Ensure chrony is not run as the root user | sysconfig
+    path: /etc/sysconfig/chronyd
+    exists: true
+    contents:
+    - '/^OPTIONS=".*-u chrony.*"/'
+    - '!/^OPTIONS="".*-u root.*"/'
+    skip: false
+    meta:
+      server: 1
+      workstation: 1
+      CIS_ID:
+      - 2.3.3
+      NIST800-53R5:
+      - AU-3
+      - AU-12
+  {{ end }}
+{{ end }}

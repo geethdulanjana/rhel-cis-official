@@ -1,0 +1,214 @@
+# Changes to rhel10CIS
+
+## August 2026 - QA pass: handler, sysctl and default fixes
+
+- Fixed /tmp mount options never applying - remount_tmp.yml flattened so every task carries listen thanks to @rajsshah86 public issue #112
+- Fixed runtime sysctl drift never being corrected and added 60-fs_sysctl.conf to the POST reload
+- Removed coredump replace tasks that commented out the RPM-owned /usr/lib vendor file each run thanks to @mindrb public issue #108
+- Route flush moved to handlers so it only fires when sysctl config changes thanks to @goegol public issue #115
+- Reload sysctl now defined before the route flush handlers so config is applied before the cache is flushed
+- nfs_server and rpc_server now default true so the masking tasks actually run
+- Corrected level tags for 1.2.1.3, 1.3.1.6 and 2.1.19 against the v1.0.1 benchmark
+- Rebuilt vars/is_container.yml against v1.0.1 rule numbering - all 58 toggles were stale
+- Audit variables moved from vars/audit.yml to defaults/main/audit.yml so they can be overridden
+- Fixed auditd handler guards, exception template path, and added failed_when to greps that fail on no match
+- README updates and updated contributing and contributors
+
+## July 2026
+
+- actions workflow update version
+- Updated location that goss is taken from goss-org moved to krameff
+- Fixed ansible dot notation missed last time
+- auditd immutable check fix and handler logic
+- thanks to @defnotyujine
+  - rhel10cis_loopback_firewall_zone fixed for 4.1.6
+  - tmp mount handler changed to import_tasks
+
+issues:
+thanks to @mindrb
+- #104 tags on user check in main.yml
+- #106 conditional logic not correct
+- #108 missing notifies when changing conf files 1.5.x and values that don't adhere to standards to be commented out where docs advise
+
+## June 2026 - QA pass: tag, toggle, and hygiene fixes
+
+- Fixed 6 CIS level/profile tag mismatches against v1.0.1 recommendations (1.1.2.5.1, 1.8.5, 2.1.11, 2.1.20, 3.3.2.1, 6.3.3.22) - includes a `level2- workstation` typo (stray space) on 6.3.3.22
+- **Behavior change**: `rhel10cis_nfs_server` and `rhel10cis_rpc_server` now default to `false` (was `true`, contradicting `*_mask: true` on the same services - services were configured to be both kept running and masked simultaneously)
+- Removed a dead `notify:` on 6.3.3.10 referencing a non-existent "update auditd" handler (correct handler is "Restart auditd")
+- Removed `export_badges_public.yml` and `update_galaxy.yml` from `.github/workflows/` - these are public-mirror-only workflows and should not exist in this private repo
+- Fixed LICENSE copyright casing (`Mindpoint` -> `MindPoint`)
+- Rebranded README Twitter badge to X (`x.com/AnsibleLockdown`)
+- Added `prompt.md` and `test_inv` patterns to `.gitignore`
+- Minor README grammar fix
+- molecule added
+- ansible_facts context change from ansible_facts.distribution to ansible_facts['distribution']
+- Moved prelim tasks to control areas for easier management
+- vars containing warning moved to actual task
+- container vars file now a variable
+- enable multiple line in the audit template
+- 2.1.x service and pkgs logic vars now in vars/main.yml enabled a more agnostic OS approach going forward
+- 5.4.3.3 thanks to @mboeker public pr #99 for raising this
+- aide improvements thanks to @thuliumdrake
+- 6.2.2 addressed some controls thanks to public issue #98 and @mboeker
+
+## April 2026 - Common alignment and CIS validation (`rhel10`)
+
+
+# 1.0.1 - June updates
+
+- Updated logic on mount checks
+- Updated tmp handler
+- Connecting User logic updated
+- Removed upcoming deprecation warning for ansible core modules - Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+- Ansible_vars_goss renamed to lockdown_audit.yml
+- Updated collections/requirement.yml to use source now for core 2.16 or later
+- Ansible core version minimum now 2.16 inline with other repos
+
+# 1.0.1 - Additional public updates
+
+thanks to @aaronk1
+#85
+#86
+#86
+
+Thanks to @defnotyujine
+public PR 100
+
+# 1.0.1 - April 2026 updates
+
+- Tidy up and improve command and shell modules
+- 3.2.x linting updated permissions
+- Updated content in 6.2.3.8
+- Thanks to @mindrb
+  - #76 6.2.3.7 removed second condition not part of CIS
+  - #77 & #78 - 6.2.3.3 - moved to drop in file as better practice
+  - #79 root password check
+- bootloader update rule 1.4.1 thanks to @skullbringer in the discord community
+- 7.1.12 and 7.1.13 - fixed logic and ordering
+- 2.1.x improved logic for stopped/disable/masked
+
+# 1.0.1 - March 26 updates
+- Common file updates
+- De-duped company
+- titles aligned
+- meta aligned
+
+- thanks to @defnotujine
+  - #70 tags for acl 7.2.8
+  - #72 3.2.3 correct level added
+
+- thanks to @mindrb
+  - #62 config aide enhancement
+  - #63 typo in 5.1.1
+  - #64 tmp.mount enhancement
+  - #65 tidy up modprobe blacklisting
+  - #68 6.2.3.8 package name typo fix
+  - #69 use passwd rule fixed
+  - #71 tuning chrony rules and new optional start variable
+  - #72 rhel10cis_remove_kernel_discovery_script
+
+## 1.0.1 - Based upon CIS official 1.0.1
+
+2026 FEB QA Updates
+
+- Fixed repeated word typos in defaults/main.yml and task names (5.3.2.2.5)
+- Fixed missing apostrophe in 99-finalize.rules.j2 template
+- Fixed subject-verb agreement in defaults/main.yml and goss template comments
+- Fixed undefined variable references:
+  - 5.3.1.5 - rhel10cis_authselect dict access corrected to rhel10cis_authselect_custom_profile_name
+  - 5.4.1.3 - rhel10cis_pass dict access corrected to rhel10cis_pass_warn_age
+  - tmp.mount.j2 - corrected rule variable references to rhel10cis_rule_1_1_2_1_x
+- Added missing rhel10cis_uses_root variable definition to defaults
+- Fixed register variable naming: discover_wireless_adapters renamed to discovered_wireless_adapters
+- Fixed multiple consecutive spaces and grammar in comments across defaults, tasks, templates, and vars
+- Fixed "can must" grammar error in AIDE cron schedule comments
+- Removed 5.3.2.x controls from defaults/main
+- Typo on task 1.5.8: Fix rhel10cis_rule_1_5_1 to rhel10cis_rule_1_5_8
+- Add rule "Ensure rpcbind services are not in use" via 2.1.11
+- 1.5.1 added missing * thanks to @christoffer-appe
+- 6.3.3.33 and .34 fixed spacing in templates thanks to @christoffer-appe
+
+Improvements Jan 2026
+
+- Thanks to Eugene@Frequentis for feedback
+- Updated bootloader_password to bootloader_hash variable and context added
+- disruption is high set back to default false
+- fs.suid_dumpable template moved to correct control 1.5.4 from 1.5.3
+- 6.2.2.1.2 updated logic as systemd/journald-upload.conf doesn't exist on clean install
+- 5.4.1.1 description updated and disruption high added to control
+- 2.3.2 - updated rhel10cis_time_synchronization_servers variables and updated template
+- README updated to explain workstation controls and variable overrides
+- 6.3.4.8 added logic as augenrules not always present on some OS
+- fixed typos in levels aligned with benchmark
+- 1.3.1.8 tidied up
+- thanks to thulium-drake boot password hash Added passlib dependency in readme requirements
+- tidy up tags on tasks/main.yml
+
+Fixes from Public RHEL9CIS PR 425
+
+- 3.1.1
+  - Added better sysctl logic to disable IPv6
+  - Added option to disable IPv6 via sysctl (original method) or via the kernel
+- 1.1.1.11 - comments in script updated
+- 1.4.2 - efi boot options no longer required so removed
+- 1.5.9 & 10 - template updated
+- 2.1.4 kea services updated
+- 5.1.2 - logic update
+- 6.3.3.8 - updated auditd rule for NetworkManager and title updated
+- 6.3.3.33 & 34 - updated rule logic
+
+## 1.0.0 - Based upon CIS official 1.0.0
+
+- updated to audit config
+- max-concurrent option added
+- auditd warning added as task
+- latest workflows
+- Added CCI references
+- relabel added to selinux - new variable added
+
+## 0.1.5
+
+- run_audit logic update
+- improvements to 5.3.3.x logic for rhel10 and ansible-core 2.19 compatibility.
+- thanks to @piratesecurity
+  - /boot/efi mount settings 1.4.2
+- thanks to @stevehayes
+  - audit files permissions
+- pre-commit update
+
+## 0.1.4
+
+pre-commit updates
+6.2.3.3 updated path for journald.conf
+
+thanks to @DianaMariaDDM
+- Improvements in defaults main
+- typo fixes
+thanks to @chrispipo
+- rsyslog ordering
+#thanks to @polski-g
+- gdm logic for graphical desktop
+
+## 0.1.3
+
+Aligned with public RHEL9 fixes
+- 5.4.2.5 - Enhancement for none existing directories thanks to @DianaMariaDDM
+- 6.3.4.5 - fixed audit file permissions inline thanks to @DianaMariaDDM
+- 6.3.3.5 - added missing locations for audit
+- Added fix for yescrypt and root password check thanks to miso321
+
+## 0.1.2
+
+Update to audit_only to allow fetching results
+resolved false warning for fetch auditq
+Improved documentation and variable compilation for crypto policies
+
+## 0.1.1 RHEL10 - updates
+
+Thanks to @polski-g several issues and improvements added
+Improved testing for 50-redhat.conf for ssh
+5.1.x regexp improvements
+Improved root password check
+egrep command changed to grep -E
+
+## 0.1 RHEL10BETA - expected CIS benchmark

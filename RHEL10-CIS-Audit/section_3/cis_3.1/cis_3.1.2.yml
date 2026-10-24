@@ -1,0 +1,20 @@
+---
+
+{{ if .Vars.rhel10cis_level_1 }}
+  {{ if .Vars.rhel10cis_rule_3_1_2 }}
+command:
+  wireless_disabled:
+    title: 3.1.2 | Ensure wireless interfaces are not available
+    exit-status: 0
+    exec: 'nmcli radio all | tail -1'
+    stdout:
+    - '/^(enabled|disabled|missing)\s\s(disabled)\s\s(enabled|disabled|missing)\s\s(disabled)/'
+    meta:
+      server: 1
+      workstation: NA
+      CIS_ID:
+      - 3.1.2
+      NIST800-53R5:
+      - AC-18
+  {{ end }}
+{{ end }}

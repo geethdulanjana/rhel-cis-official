@@ -1,0 +1,113 @@
+# Changes to RHEL10-CIS-Audit
+
+## July 2026
+- Updated links that the audit comes from goss-org moved to krameff
+
+## June 2026 — QA pass: orphaned toggle cleanup
+
+- Removed `rhel10cis_rule_5_3_2_2_8` from `vars/CIS.yml`
+- 6.2.2.2 updated for journald
+
+## April 2026 — QA Updates
+
+- goss.yml: added missing journald conditional guard for section_6/cis_6.2.2.x
+- 6.2.1.4: fixed duplicate/typo key names (not ryslog_system -> not_rsyslog_system / not_journald_system)
+- 2.1.21: fixed missing pipe separator in title and inconsistent wording (agent -> agents)
+- 2.4.2.1: fixed missing space before pipe separator in title
+- 6.2.3.7, 6.2.3.8: removed blank line before YAML document marker
+- vars/CIS.yml: removed orphan variable rhel10cis_rule_5_3_2_2_8
+- Added missing NIST800-53R5 mappings to 1.1.1.1, 1.5.10, 1.8.6, 2.3.3, 6.1.3, 6.3.3.3
+- Normalized CIS_ID format in section_1/cis_1.1.1.x from inline to list format
+
+## March 2026 — audit alignment
+
+- title alignment for CIS documentation
+- yml file start added
+- meta data fixes
+
+## CIS 1.0.1
+
+2026 FEB QA UPDATES
+
+- removed 5.3.2.x from vars/main
+- updated BENCHMARK_VER to 1.0.1 in run_audit.sh
+- updated LICENSE copyright year to 2026
+- standalone.yml: fixed section_1/cis_1.8 path to cis_1.8.x
+- standalone.yml: fixed section_3/cis_3.3 path to cis_3.3.1 and cis_3.3.2
+- standalone.yml: added missing section_6 paths (6.2.1.x, 6.2.2.1.x)
+- standalone.yml: fixed section_6/cis_6.2.4 path to cis_6.2.4.x
+- README.md: fixed "clone" to "cloned", "RHEL 9" to "RHEL 10", heading capitalization
+- vars/CIS.yml: fixed typos (",a llow" and "seperated")
+- Changelog.md: fixed typos (udpated, npt, seperate)
+- 1.1.2.5.1: fixed NIST800-53R4 to NIST800-53R5
+- 1.4.2: fixed missing space in title pipe separator
+- 1.5.4: fixed swapped live/conf test descriptions
+- 3.3.1.4: fixed missing space in title pipe separator
+- 5.1.2: fixed malformed _group/_user title suffixes to pipe-separated format
+- 5.1.3: fixed malformed _group/_user title suffixes and variable typo (keysperm to keyperms)
+- 5.2.1: fixed template variable spacing and indentation
+
+- 3.1.1
+  - Added option to audit disable IPv6 via sysctl (original method) or via the kernel
+- updated version
+- 1.4.2 removed efi steps
+- 2.1.4 updated for kea services
+- 6.3.3.8 updated
+- 6.3.3.34 updated
+
+## 1.0.5 updated to use goss > 0.4. - based on CIS v1.0.0
+
+- updated ssh config to use more file module
+- all file module test set to use new layout with path
+
+## 1.0.4 updates and script - based on CIS v1.0.0
+
+- multiple tests updates
+- linting on spaces
+- update of the run_audit script include version check of goss binary
+
+## 1.0.3 sept25_updates - based on CIS v1.0.0
+
+- [#22](https://github.com/ansible-lockdown/RHEL9-CIS-Audit/issues/22)
+- [#23](https://github.com/ansible-lockdown/RHEL9-CIS-Audit/issues/23)
+- [#24](https://github.com/ansible-lockdown/RHEL9-CIS-Audit/issues/24)
+
+## 1.0.2
+
+- Oracle linux support added
+- updates to 5.3.7 sugroup
+- vars 5.1.9 added thanks to @tpaiii3 [#18](https://github.com/ansible-lockdown/RHEL9-CIS-Audit/issues/18)
+  - run_audit typo script resolved
+
+## 1.0.1 improvements to sshd
+
+Allow option to set sshd_config file
+aligned with remediate
+
+## 1.0 Based upon CIS 1.0.0 official release
+
+aligned with remediate
+
+## 0.3 CIS - v1.0.0
+
+- many updates and fixes
+  - mountpoint updates
+  - regex and search improvements
+  - greater consistency on control report
+  - tested and working on rockylinux
+
+## 0.2
+
+- not all controls work with rhel8 releases any longer
+  - selinux disabled 1.6.1.4
+  - logrotate - 4.3.x
+
+- aligned with rh8 v2.0
+- removed iptables (not valid on rhel9)
+- logrotate extended as separate package
+- 1.6.1.4 - selinux disabled via config file no longer valid checked via boot in 1.6.1.2
+
+## Initial
+
+- Development testing only - not yet GA
+- Based on RH8 CIS 1.0.1

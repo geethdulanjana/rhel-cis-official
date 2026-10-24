@@ -1,0 +1,471 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# TKE CIS Audit Variables — Phase 1 (Section 1 only)
+#
+# Based on CIS.yml from RHEL9-CIS-Audit repo, customized for:
+#   - Only Section 1 enabled (sections 2-7 disabled)
+#   - TKE-specific exceptions applied
+#   - Cloud image exceptions (no separate partitions, no bootloader password)
+#
+# USAGE:
+#   ./run_audit.sh -v vars/tke-cis-phase1.yml -o /tmp/goss-results.json -g all
+# ─────────────────────────────────────────────────────────────────────────────
+
+## Metadata
+benchmark_version: '2.0.0'
+host_os_distribution: RedHat
+timeout_ms: 120000
+run_heavy_tests: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION TOGGLES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rhel9cis_section1: true
+rhel9cis_section2: false
+rhel9cis_section3: false
+rhel9cis_section4: false
+rhel9cis_section5: false
+rhel9cis_section6: false
+rhel9cis_section7: false
+
+rhel9cis_level_1: true
+rhel9cis_level_2: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1 GENERAL SETTINGS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+rhel9cis_selinux_disable: false
+rhel9cis_legacy_boot: false
+rhel9cis_set_boot_pass: false
+rhel9cis_gui: false
+rhel9cis_dconf_db_name: local
+rhel9cis_warning_banner: Authorized uses only. All activity may be monitored and reported.
+rhel9cis_enable_repogpg: true
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTION 1 RULES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# 1.1.1.x Kernel modules — all enabled
+rhel9cis_rule_1_1_1_1: true
+rhel9cis_rule_1_1_1_2: true
+rhel9cis_rule_1_1_1_3: true
+rhel9cis_rule_1_1_1_4: true
+rhel9cis_rule_1_1_1_5: true
+rhel9cis_rule_1_1_1_6: true
+rhel9cis_rule_1_1_1_7: true
+rhel9cis_rule_1_1_1_8: true
+rhel9cis_rule_1_1_1_9: true
+
+# 1.1.2.x Filesystem mount options — enabled (will report fails for missing partitions)
+rhel9cis_rule_1_1_2_1_1: true
+rhel9cis_rule_1_1_2_1_2: true
+rhel9cis_rule_1_1_2_1_3: true
+rhel9cis_rule_1_1_2_1_4: true
+rhel9cis_rule_1_1_2_2_1: true
+rhel9cis_rule_1_1_2_2_2: true
+rhel9cis_rule_1_1_2_2_3: true
+rhel9cis_rule_1_1_2_2_4: true
+rhel9cis_rule_1_1_2_3_1: true
+rhel9cis_rule_1_1_2_3_2: true
+rhel9cis_rule_1_1_2_3_3: true
+rhel9cis_rule_1_1_2_4_1: true
+rhel9cis_rule_1_1_2_4_2: true
+rhel9cis_rule_1_1_2_4_3: true
+rhel9cis_rule_1_1_2_5_1: true
+rhel9cis_rule_1_1_2_5_2: true
+rhel9cis_rule_1_1_2_5_3: true
+rhel9cis_rule_1_1_2_5_4: true
+rhel9cis_rule_1_1_2_6_1: true
+rhel9cis_rule_1_1_2_6_2: true
+rhel9cis_rule_1_1_2_6_3: true
+rhel9cis_rule_1_1_2_6_4: true
+rhel9cis_rule_1_1_2_7_1: true
+rhel9cis_rule_1_1_2_7_2: true
+rhel9cis_rule_1_1_2_7_3: true
+rhel9cis_rule_1_1_2_7_4: true
+
+# 1.2.1.x Package repos
+rhel9cis_rule_1_2_1_1: true
+rhel9cis_rule_1_2_1_2: true
+rhel9cis_rule_1_2_1_3: false   # EXCEPTION: Tencent repos don't support repo_gpgcheck
+rhel9cis_rule_1_2_1_4: true
+
+# 1.2.2.x Package updates
+rhel9cis_rule_1_2_2_1: false   # EXCEPTION: skipped in build, patch separately
+
+# 1.3.1.x SELinux
+rhel9cis_rule_1_3_1_1: true
+rhel9cis_rule_1_3_1_2: true
+rhel9cis_rule_1_3_1_3: true
+rhel9cis_rule_1_3_1_4: true
+rhel9cis_rule_1_3_1_5: true    # Will FAIL — permissive mode (expected)
+rhel9cis_rule_1_3_1_6: true
+rhel9cis_rule_1_3_1_7: true
+rhel9cis_rule_1_3_1_8: true
+
+# 1.4.x Bootloader
+rhel9cis_rule_1_4_1: false     # EXCEPTION: cloud image, no console
+rhel9cis_rule_1_4_2: false     # EXCEPTION: cloud image, no console
+
+# 1.5.x Process hardening
+rhel9cis_rule_1_5_1: true
+rhel9cis_rule_1_5_2: true
+rhel9cis_rule_1_5_3: true
+rhel9cis_rule_1_5_4: true
+
+# 1.6.x Crypto policy
+rhel9cis_rule_1_6_1: true
+rhel9cis_rule_1_6_2: true
+rhel9cis_rule_1_6_3: true
+rhel9cis_rule_1_6_4: true
+rhel9cis_rule_1_6_5: true
+rhel9cis_rule_1_6_6: true
+rhel9cis_rule_1_6_7: true
+
+# 1.7.x Banners
+rhel9cis_rule_1_7_1: true
+rhel9cis_rule_1_7_2: true
+rhel9cis_rule_1_7_3: true
+rhel9cis_rule_1_7_4: true
+rhel9cis_rule_1_7_5: true
+rhel9cis_rule_1_7_6: true
+
+# 1.8.x GNOME — all disabled (server, no GUI)
+rhel9cis_rule_1_8_1: false
+rhel9cis_rule_1_8_2: false
+rhel9cis_rule_1_8_3: false
+rhel9cis_rule_1_8_4: false
+rhel9cis_rule_1_8_5: false
+rhel9cis_rule_1_8_6: false
+rhel9cis_rule_1_8_7: false
+rhel9cis_rule_1_8_8: false
+rhel9cis_rule_1_8_9: false
+rhel9cis_rule_1_8_10: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SECTIONS 2-7 RULES (all disabled — required by goss templates)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Section 2
+rhel9cis_rule_2_1_1: false
+rhel9cis_rule_2_1_2: false
+rhel9cis_rule_2_1_3: false
+rhel9cis_rule_2_1_4: false
+rhel9cis_rule_2_1_5: false
+rhel9cis_rule_2_1_6: false
+rhel9cis_rule_2_1_7: false
+rhel9cis_rule_2_1_8: false
+rhel9cis_rule_2_1_9: false
+rhel9cis_rule_2_1_10: false
+rhel9cis_rule_2_1_11: false
+rhel9cis_rule_2_1_12: false
+rhel9cis_rule_2_1_13: false
+rhel9cis_rule_2_1_14: false
+rhel9cis_rule_2_1_15: false
+rhel9cis_rule_2_1_16: false
+rhel9cis_rule_2_1_17: false
+rhel9cis_rule_2_1_18: false
+rhel9cis_rule_2_1_19: false
+rhel9cis_rule_2_1_20: false
+rhel9cis_rule_2_1_21: false
+rhel9cis_rule_2_1_22: false
+rhel9cis_rule_2_2_1: false
+rhel9cis_rule_2_2_2: false
+rhel9cis_rule_2_2_3: false
+rhel9cis_rule_2_2_4: false
+rhel9cis_rule_2_2_5: false
+rhel9cis_rule_2_3_1: false
+rhel9cis_rule_2_3_2: false
+rhel9cis_rule_2_3_3: false
+rhel9cis_rule_2_4_1_1: false
+rhel9cis_rule_2_4_1_2: false
+rhel9cis_rule_2_4_1_3: false
+rhel9cis_rule_2_4_1_4: false
+rhel9cis_rule_2_4_1_5: false
+rhel9cis_rule_2_4_1_6: false
+rhel9cis_rule_2_4_1_7: false
+rhel9cis_rule_2_4_1_8: false
+rhel9cis_rule_2_4_2_1: false
+
+# Section 3
+rhel9cis_rule_3_1_1: false
+rhel9cis_rule_3_1_2: false
+rhel9cis_rule_3_1_3: false
+rhel9cis_rule_3_2_1: false
+rhel9cis_rule_3_2_2: false
+rhel9cis_rule_3_2_3: false
+rhel9cis_rule_3_2_4: false
+rhel9cis_rule_3_3_1: false
+rhel9cis_rule_3_3_2: false
+rhel9cis_rule_3_3_3: false
+rhel9cis_rule_3_3_4: false
+rhel9cis_rule_3_3_5: false
+rhel9cis_rule_3_3_6: false
+rhel9cis_rule_3_3_7: false
+rhel9cis_rule_3_3_8: false
+rhel9cis_rule_3_3_9: false
+rhel9cis_rule_3_3_10: false
+rhel9cis_rule_3_3_11: false
+
+# Section 4
+rhel9cis_rule_4_1_1: false
+rhel9cis_rule_4_1_2: false
+rhel9cis_rule_4_2_1: false
+rhel9cis_rule_4_2_2: false
+rhel9cis_rule_4_3_1: false
+rhel9cis_rule_4_3_2: false
+rhel9cis_rule_4_3_3: false
+rhel9cis_rule_4_3_4: false
+
+# Section 5
+rhel9cis_rule_5_1_1: false
+rhel9cis_rule_5_1_2: false
+rhel9cis_rule_5_1_3: false
+rhel9cis_rule_5_1_4: false
+rhel9cis_rule_5_1_5: false
+rhel9cis_rule_5_1_6: false
+rhel9cis_rule_5_1_7: false
+rhel9cis_rule_5_1_8: false
+rhel9cis_rule_5_1_9: false
+rhel9cis_rule_5_1_10: false
+rhel9cis_rule_5_1_11: false
+rhel9cis_rule_5_1_12: false
+rhel9cis_rule_5_1_13: false
+rhel9cis_rule_5_1_14: false
+rhel9cis_rule_5_1_15: false
+rhel9cis_rule_5_1_16: false
+rhel9cis_rule_5_1_17: false
+rhel9cis_rule_5_1_18: false
+rhel9cis_rule_5_1_19: false
+rhel9cis_rule_5_1_20: false
+rhel9cis_rule_5_1_21: false
+rhel9cis_rule_5_1_22: false
+rhel9cis_rule_5_2_1: false
+rhel9cis_rule_5_2_2: false
+rhel9cis_rule_5_2_3: false
+rhel9cis_rule_5_2_4: false
+rhel9cis_rule_5_2_5: false
+rhel9cis_rule_5_2_6: false
+rhel9cis_rule_5_2_7: false
+rhel9cis_rule_5_3_1_1: false
+rhel9cis_rule_5_3_1_2: false
+rhel9cis_rule_5_3_1_3: false
+rhel9cis_rule_5_3_2_1: false
+rhel9cis_rule_5_3_2_2: false
+rhel9cis_rule_5_3_2_3: false
+rhel9cis_rule_5_3_2_4: false
+rhel9cis_rule_5_3_2_5: false
+rhel9cis_rule_5_3_3_1_1: false
+rhel9cis_rule_5_3_3_1_2: false
+rhel9cis_rule_5_3_3_1_3: false
+rhel9cis_rule_5_3_3_2_1: false
+rhel9cis_rule_5_3_3_2_2: false
+rhel9cis_rule_5_3_3_2_3: false
+rhel9cis_rule_5_3_3_2_4: false
+rhel9cis_rule_5_3_3_2_5: false
+rhel9cis_rule_5_3_3_2_6: false
+rhel9cis_rule_5_3_3_2_7: false
+rhel9cis_rule_5_3_3_3_1: false
+rhel9cis_rule_5_3_3_3_2: false
+rhel9cis_rule_5_3_3_3_3: false
+rhel9cis_rule_5_3_3_4_1: false
+rhel9cis_rule_5_3_3_4_2: false
+rhel9cis_rule_5_3_3_4_3: false
+rhel9cis_rule_5_3_3_4_4: false
+rhel9cis_rule_5_4_1_1: false
+rhel9cis_rule_5_4_1_2: false
+rhel9cis_rule_5_4_1_3: false
+rhel9cis_rule_5_4_1_4: false
+rhel9cis_rule_5_4_1_5: false
+rhel9cis_rule_5_4_1_6: false
+rhel9cis_rule_5_4_2_1: false
+rhel9cis_rule_5_4_2_2: false
+rhel9cis_rule_5_4_2_3: false
+rhel9cis_rule_5_4_2_4: false
+rhel9cis_rule_5_4_2_5: false
+rhel9cis_rule_5_4_2_6: false
+rhel9cis_rule_5_4_2_7: false
+rhel9cis_rule_5_4_2_8: false
+rhel9cis_rule_5_4_3_1: false
+rhel9cis_rule_5_4_3_2: false
+rhel9cis_rule_5_4_3_3: false
+
+# Section 6
+rhel9cis_rule_6_1_1: false
+rhel9cis_rule_6_1_2: false
+rhel9cis_rule_6_1_3: false
+rhel9cis_rule_6_2_1_1: false
+rhel9cis_rule_6_2_1_2: false
+rhel9cis_rule_6_2_1_3: false
+rhel9cis_rule_6_2_1_4: false
+rhel9cis_rule_6_2_2_1_1: false
+rhel9cis_rule_6_2_2_1_2: false
+rhel9cis_rule_6_2_2_1_3: false
+rhel9cis_rule_6_2_2_1_4: false
+rhel9cis_rule_6_2_2_2: false
+rhel9cis_rule_6_2_2_3: false
+rhel9cis_rule_6_2_2_4: false
+rhel9cis_rule_6_2_3_1: false
+rhel9cis_rule_6_2_3_2: false
+rhel9cis_rule_6_2_3_3: false
+rhel9cis_rule_6_2_3_4: false
+rhel9cis_rule_6_2_3_5: false
+rhel9cis_rule_6_2_3_6: false
+rhel9cis_rule_6_2_3_7: false
+rhel9cis_rule_6_2_3_8: false
+rhel9cis_rule_6_2_4_1: false
+rhel9cis_rule_6_3_1_1: false
+rhel9cis_rule_6_3_1_2: false
+rhel9cis_rule_6_3_1_3: false
+rhel9cis_rule_6_3_1_4: false
+rhel9cis_rule_6_3_2_1: false
+rhel9cis_rule_6_3_2_2: false
+rhel9cis_rule_6_3_2_3: false
+rhel9cis_rule_6_3_2_4: false
+rhel9cis_rule_6_3_3_1: false
+rhel9cis_rule_6_3_3_2: false
+rhel9cis_rule_6_3_3_3: false
+rhel9cis_rule_6_3_3_4: false
+rhel9cis_rule_6_3_3_5: false
+rhel9cis_rule_6_3_3_6: false
+rhel9cis_rule_6_3_3_7: false
+rhel9cis_rule_6_3_3_8: false
+rhel9cis_rule_6_3_3_9: false
+rhel9cis_rule_6_3_3_10: false
+rhel9cis_rule_6_3_3_11: false
+rhel9cis_rule_6_3_3_12: false
+rhel9cis_rule_6_3_3_13: false
+rhel9cis_rule_6_3_3_14: false
+rhel9cis_rule_6_3_3_15: false
+rhel9cis_rule_6_3_3_16: false
+rhel9cis_rule_6_3_3_17: false
+rhel9cis_rule_6_3_3_18: false
+rhel9cis_rule_6_3_3_19: false
+rhel9cis_rule_6_3_3_20: false
+rhel9cis_rule_6_3_3_21: false
+rhel9cis_rule_6_3_4_1: false
+rhel9cis_rule_6_3_4_2: false
+rhel9cis_rule_6_3_4_3: false
+rhel9cis_rule_6_3_4_4: false
+rhel9cis_rule_6_3_4_5: false
+rhel9cis_rule_6_3_4_6: false
+rhel9cis_rule_6_3_4_7: false
+rhel9cis_rule_6_3_4_8: false
+rhel9cis_rule_6_3_4_9: false
+rhel9cis_rule_6_3_4_10: false
+
+# Section 7
+rhel9cis_rule_7_1_1: false
+rhel9cis_rule_7_1_2: false
+rhel9cis_rule_7_1_3: false
+rhel9cis_rule_7_1_4: false
+rhel9cis_rule_7_1_5: false
+rhel9cis_rule_7_1_6: false
+rhel9cis_rule_7_1_7: false
+rhel9cis_rule_7_1_8: false
+rhel9cis_rule_7_1_9: false
+rhel9cis_rule_7_1_10: false
+rhel9cis_rule_7_1_11: false
+rhel9cis_rule_7_1_12: false
+rhel9cis_rule_7_1_13: false
+rhel9cis_rule_7_2_1: false
+rhel9cis_rule_7_2_2: false
+rhel9cis_rule_7_2_3: false
+rhel9cis_rule_7_2_4: false
+rhel9cis_rule_7_2_5: false
+rhel9cis_rule_7_2_6: false
+rhel9cis_rule_7_2_7: false
+rhel9cis_rule_7_2_8: false
+rhel9cis_rule_7_2_9: false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SERVICE / ENVIRONMENT VARIABLES (required by goss templates even if disabled)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Section 2 services
+rhel9cis_autofs_services: false
+rhel9cis_autofs_mask: true
+rhel9cis_avahi_server: false
+rhel9cis_avahi_mask: false
+rhel9cis_dhcp_server: false
+rhel9cis_dhcp_mask: false
+rhel9cis_dns_server: false
+rhel9cis_dns_mask: false
+rhel9cis_dnsmasq_server: false
+rhel9cis_dnsmasq_mask: false
+rhel9cis_samba_server: false
+rhel9cis_samba_mask: false
+rhel9cis_ftp_server: false
+rhel9cis_ftp_mask: false
+rhel9cis_message_server: false
+rhel9cis_message_mask: false
+rhel9cis_nfs_server: true
+rhel9cis_nfs_mask: true
+rhel9cis_nis_server: false
+rhel9cis_nis_mask: false
+rhel9cis_print_server: false
+rhel9cis_print_mask: false
+rhel9cis_rpc_server: true
+rhel9cis_rpc_mask: true
+rhel9cis_rsync_server: false
+rhel9cis_rsync_mask: false
+rhel9cis_snmp_server: false
+rhel9cis_snmp_mask: false
+rhel9cis_telnet_server: false
+rhel9cis_telnet_mask: false
+rhel9cis_tftp_server: false
+rhel9cis_tftp_mask: false
+rhel9cis_squid_server: false
+rhel9cis_squid_mask: false
+rhel9cis_httpd_server: false
+rhel9cis_httpd_mask: false
+rhel9cis_nginx_server: false
+rhel9cis_nginx_mask: false
+rhel9cis_xinetd_server: false
+rhel9cis_xinetd_mask: false
+rhel9cis_xwindow_server: false
+rhel9cis_is_mail_server: false
+rhel9cis_ftp_client: false
+rhel9cis_openldap_clients_required: false
+rhel9cis_ypbind_required: false
+rhel9cis_telnet_required: false
+rhel9cis_tftp_client: false
+
+# Section 3
+rhel9cis_bluetooth_service: false
+rhel9cis_bluetooth_mask: false
+rhel9cis_ipv6_required: true
+rhel9cis_ipv6_disable_method: sysctl
+rhel9cis_is_router: false
+rhel9cis_firewall: firewalld
+
+# Section 5
+rhel9_cis_sshd_config_file: /etc/ssh/sshd_config
+rhel9cis_sshd_allowusers: root
+rhel9cis_sshd_allowgroups:
+rhel9cis_sshd_denyusers: nobody
+rhel9cis_sshd_denygroups:
+rhel9cis_sugroup: sugroup
+rhel9cis_authselect_custom_profile_create: false
+rhel9cis_authselect_custom_profile_select: false
+rhel9cis_authselect_custom_profile_name: cis_tke_hardened
+rhel9cis_passwd_complex_option: minclass
+rhel9cis_pass_max_days: "365"
+rhel9cis_pass_min_days: "1"
+rhel9cis_pass_warn_age: "7"
+
+# Section 6
+rhel9cis_aide_scan: cron
+rhel9cis_syslog: journald
+rhel9cis_remote_log_server: false
+rhel9cis_remote_log_host: logagg.example.com
+rhel9cis_remote_log_port: 514
+rhel9cis_remote_log_protocol: tcp
+rhel9cis_remote_log_retrycount: 100
+rhel9cis_remote_log_queuesize: 1000
+
+# Section 7
+rhel9cis_exclude_unowned_search_path: \(! -path "/run/user/*" -a ! -path "/proc/*" -a ! -path "*/containerd/*" -a ! -path "*/kubelet/pods/*" -a ! -path "*/kubelet/plugins/*" -a ! -path "/sys/fs/cgroup/memory/*" -a ! -path "/var/*/private/*" \)

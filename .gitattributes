@@ -1,0 +1,7 @@
+# Force LF on files that run on the Linux builder so Windows checkouts don't
+# inject CRLF that breaks shell scripts / packer / ansible.
+*.sh    text eol=lf
+*.hcl   text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.j2    text eol=lf

@@ -1,0 +1,23 @@
+---
+
+{{ if .Vars.rhel10cis_level_1 }}
+  {{ if .Vars.rhel10cis_rule_4_1_2 }}
+    {{ if eq .Vars.rhel10cis_firewall "firewalld" }}
+file:
+  firewalld:
+    title: 4.1.2 | Ensure firewalld backend is configured
+    path: /etc/firewalld/firewalld.conf
+    exists: true
+    contents:
+    - '/^FirewallBackend\s*=\s*nftables/'
+    - '!/^FirewallBackend\s*=\s*iptables/'
+    meta:
+      server: 1
+      workstation: 1
+      CIS_ID:
+      - 4.1.2
+      NIST800-53R5:
+      - CA-9
+    {{ end }}
+  {{ end }}
+{{ end }}

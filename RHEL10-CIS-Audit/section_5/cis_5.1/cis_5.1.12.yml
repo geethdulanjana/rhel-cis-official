@@ -1,0 +1,24 @@
+---
+
+{{ if .Vars.rhel10cis_level_1 }}
+  {{ if .Vars.rhel10cis_rule_5_1_12 }}
+command:
+  no_weak_ssh_kex:
+    title: 5.1.12 | Ensure sshd KexAlgorithms is configured
+    exec: sshd -T | grep -Pi -- 'kexalgorithms\h+([^#\n\r]+,)?(diffie-hellman-group1-sha1|diffie-hellman-group14-sha1|diffie-hellman-group-exchange-sha1)\b'
+    exit-status:
+      or:
+      - 0
+      - 1
+    stdout: ['!/./']
+    meta:
+      server: 1
+      workstation: 1
+      CIS_ID:
+      - 5.1.12
+      NIST800-53R5:
+      - AC-17
+      CCI:
+      - CCI-01453
+  {{ end }}
+{{ end }}

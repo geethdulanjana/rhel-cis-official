@@ -1,0 +1,104 @@
+---
+
+- name: "Journald | AUDIT | 6.2.2.x Journald | find upload conf files"
+  ansible.builtin.find:
+    paths: /etc/systemd/journald.conf.d
+    patterns: "*.conf"
+    read_whole_file: true
+  register: discovered_journald_confdir_created
+
+- name: "6.2.2.2 | PATCH | Ensure journald ForwardToSyslog is disabled"
+  when:
+    - rhel10cis_rule_6_2_2_2
+    - rhel10cis_syslog == 'journald'
+  tags:
+    - level1-server
+    - level1-workstation
+    - patch
+    - journald
+    - rule_6.2.2.2
+    - NIST800-53R5_AU-2
+    - NIST800-53R5_AU-6
+    - NIST800-53R5_AU-7
+    - NIST800-53R5_AU-12
+  notify: Restart journald
+  block:
+    - name: "6.2.2.2 | PATCH | Ensure journald ForwardToSyslog is disabled | Add file"
+      ansible.builtin.template:
+        src: etc/systemd/journald.conf.d/forwardtosyslog.conf.j2
+        dest: "/etc/systemd/journald.conf.d/forwardtosyslog.conf"
+        owner: root
+        group: root
+        mode: 'u-x,g-wx,o-rwx'
+
+    - name: "6.2.2.2 | PATCH | Ensure journald ForwardToSyslog is disabled | comment out current entries"
+      when:
+        - discovered_journald_confdir_created.files is defined
+        - discovered_journald_confdir_created.matched > 0
+        - "'forwardtosyslog.conf' not in item.path"
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: ^(\s*ForwardToSyslog\s*=.*)
+        replace: "#\\1"
+      loop: "{{ discovered_journald_confdir_created.files }}"
+
+- name: "6.2.2.3 | PATCH | Ensure journald Compress is configured"
+  when: rhel10cis_rule_6_2_2_3
+  tags:
+    - level1-server
+    - level1-workstation
+    - patch
+    - journald
+    - rule_6.2.2.3
+    - NIST800-53R5_AU-4
+  notify: Restart journald
+  block:
+    - name: "6.2.2.3 | PATCH | Ensure journald Compress is configured | Add file"
+      ansible.builtin.template:
+        src: etc/systemd/journald.conf.d/storage.conf.j2 # Added to the same file as 6.2.2.4
+        dest: "/etc/systemd/journald.conf.d/storage.conf"
+        owner: root
+        group: root
+        mode: 'u-x,g-wx,o-rwx'
+
+    - name: "6.2.2.3 | PATCH | Ensure journald Compress is configured | comment out current entries"
+      when:
+        - discovered_journald_confdir_created.files is defined
+        - discovered_journald_confdir_created.matched > 0
+        - "'storage.conf' not in item.path"
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: ^(\s*Compress\s*=.*)
+        replace: "#\\1"
+      loop: "{{ discovered_journald_confdir_created.files }}"
+
+- name: "6.2.2.4 | PATCH | Ensure journald Storage is configured"
+  when: rhel10cis_rule_6_2_2_4
+  tags:
+    - level1-server
+    - level1-workstation
+    - patch
+    - journald
+    - rule_6.2.2.4
+    - NIST800-53R5_AU-3
+    - NIST800-53R5_AU-12
+  notify: Restart journald
+  block:
+    - name: "6.2.2.4 | PATCH | Ensure journald Storage is configured | Add file"
+      ansible.builtin.template:
+        src: etc/systemd/journald.conf.d/storage.conf.j2
+        dest: "/etc/systemd/journald.conf.d/storage.conf"
+        owner: root
+        group: root
+        mode: 'u-x,g-wx,o-rwx'
+
+    - name: "6.2.2.4 | PATCH | Ensure journald Storage is configured | comment out current entries"
+      when:
+        - discovered_journald_confdir_created.files is defined
+        - discovered_journald_confdir_created.matched > 0
+        - "'storage.conf' not in item.path"
+      ansible.builtin.replace:
+        path: "{{ item.path }}"
+        regexp: ^(\s*Storage\s*=.*)
+        replace: "#\\1"
+      loop: "{{ discovered_journald_confdir_created.files }}"

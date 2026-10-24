@@ -1,0 +1,33 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# rhel-cis-official — files NOT to commit.
+#
+# IMPORTANT: the pipeline-sync (TAT) git-pulls this repo onto the builder into
+# /opt/cis-pipeline. Anything the BUILDER generates at runtime must be ignored
+# here so a pull never clobbers it:
+#   - variables.auto.pkrvars.hcl : rendered by the TAT render-pkrvars flow
+#   - ansible/group_vars/all.yml : generated per-build by the app
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Runtime-rendered / generated (DO NOT COMMIT — builder owns these)
+packer/variables.auto.pkrvars.hcl
+ansible/group_vars/all.yml
+
+# Build / audit artifacts
+audit-results/
+*.zip
+
+# Large binaries / docs (keep source only)
+*.pdf
+*.xlsx
+
+# Terraform (if any ever lands here)
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+__pycache__/
+*.pyc

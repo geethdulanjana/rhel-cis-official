@@ -1,0 +1,51 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# CIS Hardening Playbook — distro-aware wrapper (RHEL 9 / RHEL 10)
+#
+# This playbook is called by Packer during image build. It selects the correct
+# ansible-lockdown role based on the `cis_distro` variable, which is written
+# into group_vars/all.yml by cis-image-builder (values: "rhel9" | "rhel10").
+#
+# The overrides in group_vars/all.yml control:
+#   - Which sections are enabled/disabled
+#   - TKE-specific exceptions (IP forwarding, firewall, SELinux, /var mounts)
+#   - Which individual rules to skip
+#
+# Role directories expected as siblings of this ansible/ dir:
+#   ../RHEL9-CIS   (variable prefix rhel9cis_)
+#   ../RHEL10-CIS  (variable prefix rhel10cis_)
+#
+# USAGE (standalone, without Packer):
+#   ansible-playbook -i "localhost," -c local ansible/playbook.yml \
+#     --extra-vars @ansible/group_vars/all.yml
+# ─────────────────────────────────────────────────────────────────────────────
+
+- name: Apply CIS hardening (distro-aware)
+  hosts: all
+  become: true
+
+  vars_files:
+    - group_vars/all.yml
+
+  vars:
+    # Default to rhel10 if the generated vars don't set it (back-compat).
+    cis_distro: "{{ cis_distro | default('rhel10') }}"
+    _cis_role_map:
+      rhel9: RHEL9-CIS
+      rhel10: RHEL10-CIS
+    _cis_role_name: "{{ _cis_role_map[cis_distro] | default('') }}"
+
+  pre_tasks:
+    - name: "Validate cis_distro resolves to a known role"
+      ansible.builtin.assert:
+        that:
+          - _cis_role_name | length > 0
+        fail_msg: >-
+          Unknown cis_distro '{{ cis_distro }}'. Expected one of
+          {{ _cis_role_map.keys() | list }}.
+        success_msg: "Using CIS role {{ _cis_role_name }} for distro {{ cis_distro }}"
+
+  tasks:
+    - name: "Include the selected CIS role"
+      ansible.builtin.include_role:
+        name: "{{ playbook_dir }}/../{{ _cis_role_name }}"

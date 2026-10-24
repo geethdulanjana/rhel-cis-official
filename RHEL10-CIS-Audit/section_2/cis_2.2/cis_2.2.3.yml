@@ -1,0 +1,20 @@
+---
+
+{{ if .Vars.rhel10cis_level_1 }}
+  {{ if not .Vars.rhel10cis_telnet_required }}
+    {{ if .Vars.rhel10cis_rule_2_2_3 }}
+package:
+  telnet_client:
+    title: 2.2.3 | Ensure telnet client is not installed
+    installed: false
+    name: telnet
+    meta:
+      server: 1
+      workstation: NA
+      CIS_ID:
+      - 2.2.3
+      NIST800-53R5:
+      - CM-7
+    {{ end }}
+  {{ end }}
+{{ end }}
