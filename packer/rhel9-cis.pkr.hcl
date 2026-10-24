@@ -245,6 +245,17 @@ build {
     ]
   }
 
+  # Step 3b: Install the TAT agent INTO the hardened image (documented exception
+  # to pure CIS). This lets the cis-image-builder validation flow drive a booted
+  # CVM via Tencent Automation Tools — the CIS-hardened sshd blocks root SSH, so
+  # TAT (no SSH, no login) is the reliable post-boot management path. Runs after
+  # hardening so it is captured in the snapshot.
+  provisioner "shell" {
+    remote_folder   = "/root"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+    script          = "scripts/05-install-tat-agent.sh"
+  }
+
   # Step 4: Independent CIS audit with OpenSCAP (after hardening).
   # Runs via bash so a noexec /tmp (from CIS mount hardening) doesn't block it.
   provisioner "shell" {

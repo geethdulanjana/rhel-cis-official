@@ -89,4 +89,33 @@ echo "$SCORE" > "$OUT/score.txt"
 PASS=$(grep -c '<result>pass</result>' "$OUT/results.xml" 2>/dev/null || echo 0)
 FAIL=$(grep -c '<result>fail</result>' "$OUT/results.xml" 2>/dev/null || echo 0)
 echo "===== OpenSCAP audit complete: score=${SCORE}%  pass=${PASS} fail=${FAIL} ====="
+
+# ── Validation integration (TAT-driven runs) ─────────────────────────────────
+# When run via TAT on a throwaway validation CVM, the runner can't use a Packer
+# file-download. Instead:
+#   1. emit machine-parseable markers on STDOUT (TAT captures stdout), and
+#   2. optionally upload the HTML report to COS if CIS_VAL_COS_URL is set.
+# These markers are harmless during a normal Packer build (just extra log lines).
+echo "VAL_SCORE=${SCORE}"
+echo "VAL_PASS=${PASS}"
+echo "VAL_FAIL=${FAIL}"
+
+if [ -n "${CIS_VAL_COS_URL:-}" ] && [ -f "$OUT/report.html" ]; then
+  # CIS_VAL_COS_URL is a full COS object URL for the report, e.g.
+  #   https://<bucket>.cos.<region>.myqcloud.com/validations/<id>/report.html
+  # coscli/tccli may not be present on a hardened image; prefer tccli if there,
+  # else fall back to a signed PUT via curl when CIS_VAL_COS_PUT is provided.
+  echo "Uploading OpenSCAP report to COS: ${CIS_VAL_COS_URL}"
+  if command -v coscli >/dev/null 2>&1; then
+    coscli cp "$OUT/report.html" "${CIS_VAL_COS_URL}" 2>&1 || echo "WARNING: coscli upload failed"
+  elif [ -n "${CIS_VAL_COS_PUT:-}" ]; then
+    curl -fsS -X PUT -T "$OUT/report.html" "${CIS_VAL_COS_PUT}" 2>&1 \
+      && echo "VAL_REPORT_URL=${CIS_VAL_COS_URL}" \
+      || echo "WARNING: curl COS upload failed"
+  else
+    echo "WARNING: no coscli and no CIS_VAL_COS_PUT — report not uploaded"
+  fi
+  [ -f "$OUT/report.html" ] && command -v coscli >/dev/null 2>&1 && echo "VAL_REPORT_URL=${CIS_VAL_COS_URL}"
+fi
+echo "VAL_DONE=1"
 exit 0
