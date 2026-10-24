@@ -113,6 +113,16 @@ variable "project" {
   default = "nprod-tencent"
 }
 
+variable "validation_pubkey" {
+  type        = string
+  default     = ""
+  description = <<EOT
+OpenSSH public key baked into the image for the 'cisval' validation user (a
+key-only, non-root sudo account used by the post-boot validation flow). Sourced
+from the Terraform SSM keypair. Empty = skip creating the user.
+EOT
+}
+
 # ─────────────────────────────────────────────────────────────────────────────
 # SOURCE — Defines the temporary CVM that Packer will create
 # ─────────────────────────────────────────────────────────────────────────────
@@ -254,6 +264,17 @@ build {
     remote_folder   = "/root"
     execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
     script          = "scripts/05-install-tat-agent.sh"
+  }
+
+  # Step 3c: Bake the 'cisval' validation user (key-only, non-root sudo) into
+  # the image so the post-boot validation flow can SSH in on a hardened image
+  # where root login is disabled. The public key comes from the Terraform SSM
+  # keypair via var.validation_pubkey. Runs after hardening so it persists in
+  # the snapshot. If the key is empty, the script no-ops.
+  provisioner "shell" {
+    remote_folder   = "/root"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} VALIDATION_PUBKEY='${var.validation_pubkey}' bash '{{ .Path }}'"
+    script          = "scripts/06-add-validation-user.sh"
   }
 
   # Step 4: Independent CIS audit with OpenSCAP (after hardening).
