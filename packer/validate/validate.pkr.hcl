@@ -88,6 +88,19 @@ variable "security_token" {
   sensitive = true
 }
 
+# The hardened image disables ROOT ssh, so validation connects as the baked
+# 'cisval' non-root sudo user using the SSM private key. The runner fetches the
+# key from SSM and passes its path here.
+variable "ssh_username" {
+  type    = string
+  default = "cisval"
+}
+
+variable "ssh_private_key_file" {
+  type        = string
+  description = "Path to the PEM private key for the cisval user (fetched from SSM by the runner)."
+}
+
 source "tencentcloud-cvm" "verify" {
   secret_id      = var.secret_id
   secret_key     = var.secret_key
@@ -109,8 +122,12 @@ source "tencentcloud-cvm" "verify" {
   disk_type = "CLOUD_SSD"
   disk_size = 20
 
-  ssh_username = "root"
-  ssh_timeout  = "10m"
+  # Connect as the baked 'cisval' user with the SSM key (root ssh is disabled on
+  # the hardened image). Give Packer the key directly so it does NOT create/inject
+  # its own temporary keypair (which would rely on root/cloud-init key injection).
+  ssh_username         = var.ssh_username
+  ssh_private_key_file = var.ssh_private_key_file
+  ssh_timeout          = "10m"
 
   # Throwaway validation image (deleted by the runner right after).
   image_name        = "cis-validate-${formatdate("YYYYMMDD-hhmmss", timestamp())}"
@@ -155,7 +172,7 @@ build {
   #    build template.)
   provisioner "shell" {
     expect_disconnect = true
-    remote_folder     = "/root"
+    remote_folder     = "/home/cisval"
     execute_command   = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
     inline = [
       "echo 'Rebooting to activate reboot-dependent CIS controls...'",
@@ -167,7 +184,7 @@ build {
   #    the cis-image-builder validation runner parses for the health verdict.
   provisioner "shell" {
     pause_before    = "45s"
-    remote_folder   = "/root"
+    remote_folder   = "/home/cisval"
     execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
     inline = [
       "echo 'Back after reboot:'; uname -r; uptime",
@@ -180,22 +197,36 @@ build {
   }
 
   # 3. Run the SAME OpenSCAP audit script — now against the rebooted system.
-  #    bash-invoke so a noexec /tmp doesn't block it.
+  #    Run the whole script under SUDO because cisval is non-root (oscap needs
+  #    privilege to read system state). noexec-safe: staged in cisval's home and
+  #    invoked through bash so a noexec /tmp doesn't block it.
   provisioner "shell" {
-    remote_folder   = "/root"
-    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+    remote_folder   = "/home/cisval"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} sudo bash '{{ .Path }}'"
     # script path is relative to the packer WORKING DIRECTORY. The runner invokes
     # packer with cwd = pipeline root (/opt/cis-pipeline), so this resolves to
     # /opt/cis-pipeline/scripts/04-openscap-audit.sh.
     script          = "scripts/04-openscap-audit.sh"
   }
 
-  # 4. Pull the post-boot results. `destination` is relative to the packer
-  # working directory; the runner invokes packer from the pipeline root, so this
-  # lands at <pipeline>/audit-results/latest-validate/.
+  # 3b. Make the root-owned OpenSCAP output readable + copyable by cisval so the
+  # file-download below (which runs as cisval) can pull it.
+  provisioner "shell" {
+    remote_folder   = "/home/cisval"
+    execute_command = "chmod +x {{ .Path }}; {{ .Vars }} bash '{{ .Path }}'"
+    inline = [
+      "sudo cp -r /var/log/openscap /home/cisval/openscap-results",
+      "sudo chown -R cisval:cisval /home/cisval/openscap-results",
+      "chmod -R a+r /home/cisval/openscap-results"
+    ]
+  }
+
+  # 4. Pull the post-boot results from cisval's readable copy. `destination` is
+  # relative to the packer working directory; the runner invokes packer from the
+  # pipeline root, so this lands at <pipeline>/audit-results/latest-validate/.
   provisioner "file" {
     direction   = "download"
-    source      = "/var/log/openscap/"
+    source      = "/home/cisval/openscap-results/"
     destination = "audit-results/latest-validate/"
   }
 }
